@@ -156,12 +156,14 @@ int2023_t operator*(const int2023_t& lhs, const int2023_t& rhs) {
     int2023_t result = from_int(0);
     int2023_t right;
     int2023_t left;
-    if (abs(lhs) < abs(rhs)) {
-        right = abs(rhs);
-        left = abs(lhs);
+    int2023_t abs_lhs = abs(lhs);
+    int2023_t abs_rhs = abs(rhs);
+    if (abs_lhs < abs_rhs) {
+        right = abs_rhs;
+        left = abs_lhs;
     } else {
-        right = abs(lhs);
-        left = abs(rhs);
+        right = abs_lhs;
+        left = abs_rhs;
     }
     int first_one_index = kBytes-1;
     for (int i = 0; i < kBytes; ++i) {
@@ -193,7 +195,7 @@ int2023_t operator*(const int2023_t& lhs, const int2023_t& rhs) {
         result = result + temp[i];
     }
     delete[] temp;
-    if ((lhs != abs(lhs) || rhs != abs(rhs)) && !(abs(lhs) != lhs && abs(rhs) != rhs)) {
+    if ((lhs != abs_lhs || rhs != abs_rhs) && !(abs_lhs != lhs && abs_rhs != rhs)) {
         TwosComplements(result);
     }
     return result;
@@ -201,10 +203,13 @@ int2023_t operator*(const int2023_t& lhs, const int2023_t& rhs) {
 
 int2023_t operator/(const int2023_t& lhs, const int2023_t& rhs) {
     int2023_t result = from_int(0);
-    if (abs(lhs) < abs(rhs)) return from_int(0);
+    int2023_t abs_lhs = abs(lhs);
+    int2023_t abs_rhs = abs(rhs);
+    if (abs_lhs < abs_rhs) return from_int(0);
+    if(rhs == from_int(0)) return lhs;
     int2023_t remainder = from_int(0);
-    int2023_t right = abs(rhs);
-    int2023_t left = abs(lhs);
+    int2023_t right = abs_rhs;
+    int2023_t left = abs_lhs;
     int first_one_index = kBytes-1;
     for (int i = 0; i < kBytes; ++i) {
         if (left.array[i] != '\000') {
@@ -223,7 +228,7 @@ int2023_t operator/(const int2023_t& lhs, const int2023_t& rhs) {
         }
         result.array[i] = result.array[i] | cache;
     }
-    if ((lhs != abs(lhs) || rhs != abs(rhs)) && !(abs(lhs) != lhs && abs(rhs) != rhs)) {
+    if ((lhs != abs_lhs || rhs != abs_rhs) && !(abs_lhs != lhs && abs_rhs != rhs)) {
         TwosComplements(result);
     }
     return result;
@@ -248,9 +253,11 @@ bool operator!=(const int2023_t& lhs, const int2023_t& rhs) {
 }
 
 bool operator<(const int2023_t& lhs, const int2023_t& rhs) {
-    if (lhs != abs(lhs)) {
-        if (rhs != abs(rhs)) {
-            if ((((abs(lhs) - abs(rhs)).array[0] >> (kBits-1)) & 1) == 0) {
+    int2023_t abs_lhs = abs(lhs);
+    int2023_t abs_rhs = abs(rhs);
+    if (lhs != abs_lhs) {
+        if (rhs != abs_rhs) {
+            if ((((abs_lhs - abs_rhs).array[0] >> (kBits-1)) & 1) == 0) {
                 return true;
             } else {
                 return false;
@@ -258,7 +265,7 @@ bool operator<(const int2023_t& lhs, const int2023_t& rhs) {
         }
         else return true;
     } else {
-        if (rhs != abs(rhs)) return false;
+        if (rhs != abs_rhs) return false;
         else {
             if ((((rhs - lhs).array[0] >> (kBits-1)) & 1) == 0 && (rhs - lhs) != from_int(0)) {
                 return true;
