@@ -205,10 +205,17 @@ int2023_t operator/(const int2023_t& lhs, const int2023_t& rhs) {
     int2023_t remainder = from_int(0);
     int2023_t right = abs(rhs);
     int2023_t left = abs(lhs);
+    int first_one_index = kBytes-1;
     for (int i = 0; i < kBytes; ++i) {
+        if (left.array[i] != '\000') {
+            first_one_index = i;
+            break;
+        }
+    }
+    for (int i = first_one_index; i < kBytes; ++i) {
         int cache = 0;
         for (int j = kBits-1; j >= 0; --j) {
-            remainder = remainder * from_int(2) + from_int((left.array[i] >> j) & 1);
+            remainder = remainder + remainder + from_int((left.array[i] >> j) & 1);
             if (right < remainder || right == remainder) {
                 cache += static_cast<int>(pow(2, j));
                 remainder = remainder - right;
