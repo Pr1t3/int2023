@@ -2,12 +2,12 @@
 #include <cmath>
 #include <cinttypes>
 #include <iostream>
-
-const int kBytes = 253;
-const int kBits = 8;
+#include <cstring>
 
 struct int2023_t {
-    char array[kBytes] = {};
+    static const int kBytes = 253;
+    static const int kBits = 8;
+    uint8_t array[kBytes] = {0};
     int2023_t(char* array) {
         for (int i = 0; i < 253; ++i) {
             this->array[i] = array[i];
@@ -17,14 +17,6 @@ struct int2023_t {
 };
 
 static_assert(sizeof(int2023_t) <= 253, "Size of int2023_t must be no higher than 253 bytes");
-
-bool IsConvertedToBin(const char* array_of_symbols, const int size);
-
-void Bin(char* array_of_symbols, int size, int2023_t& result);
-
-int2023_t abs(const int2023_t& value);
-
-void TwosComplements(int2023_t& num);
 
 int2023_t from_int(int32_t i);
 
