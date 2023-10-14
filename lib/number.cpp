@@ -120,14 +120,14 @@ int2023_t from_string(const char* buff) {
 int2023_t operator+(const int2023_t& lhs, const int2023_t& rhs) {
     int2023_t result;
     int addition = 0;
-    for (int i = int2023_t::kBytes - 1; i >= 0; --i) {
-        int8_t cache = 0;
-        for (int j = 0; j < int2023_t::kBits; ++j) {
-            int a = GetBitAfterShift(lhs.array[i], j) + GetBitAfterShift(rhs.array[i], j) + addition;
-            a >= 2 ? addition = 1 : addition = 0;
-            cache += static_cast<int>(pow(2, j)) * (a % 2);
+    for(int i = int2023_t::kBytes - 1; i >= 0; --i){
+        if((lhs.array[i] + rhs.array[i] + addition) > 255){
+            result.array[i] = lhs.array[i] + rhs.array[i] + addition - 256;
+            addition = 1;
+        } else {
+            result.array[i] = lhs.array[i] + rhs.array[i] + addition;
+            addition = 0;
         }
-        result.array[i] = result.array[i] | cache;
     }
     return result;
 }
@@ -139,17 +139,8 @@ int2023_t operator-(const int2023_t& lhs, const int2023_t& rhs) {
 
 
 int2023_t operator*(const int2023_t& lhs, const int2023_t& rhs) {
-    int2023_t lhs_abs = abs(lhs);
-    int2023_t rhs_abs = abs(rhs);
-    int2023_t rhs_copy;
-    int2023_t lhs_copy;
-    if (rhs_abs < lhs_abs) {
-        rhs_copy = rhs_abs;
-        lhs_copy = lhs_abs;
-    } else {
-        rhs_copy = lhs_abs;
-        lhs_copy = rhs_abs;
-    }
+    int2023_t rhs_copy = abs(rhs);
+    int2023_t lhs_copy = abs(lhs);
     int first_one_index = int2023_t::kBytes - 1;
     for (int i = 0; i < int2023_t::kBytes; ++i) {
         if (rhs_copy.array[i] != 0) {
@@ -216,7 +207,6 @@ int2023_t operator/(const int2023_t& lhs, const int2023_t& rhs) {
         }
         result.array[i] = result.array[i] | cache;
     }
-    std::cout << remainder << '\n';
     if ((!IsPositive(lhs.array[0]) || !IsPositive(rhs.array[0])) && !(!IsPositive(lhs.array[0]) && !IsPositive(rhs.array[0]))) {
         result = MakeTwosComplement(result);
     }

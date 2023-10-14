@@ -7,13 +7,7 @@
 struct int2023_t {
     static const int kBytes = 253;
     static const int kBits = 8;
-    uint8_t array[kBytes] = {0};
-    int2023_t(char* array) {
-        for (int i = 0; i < 253; ++i) {
-            this->array[i] = array[i];
-        }
-    }
-    int2023_t(){};
+    uint8_t array[kBytes] = {};
 };
 
 static_assert(sizeof(int2023_t) <= 253, "Size of int2023_t must be no higher than 253 bytes");
