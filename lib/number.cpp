@@ -149,32 +149,15 @@ int2023_t operator*(const int2023_t& lhs, const int2023_t& rhs) {
         }
     }
     int2023_t result;
-    int2023_t *temp = new int2023_t[(int2023_t::kBytes - first_one_index) * int2023_t::kBits];
     for (int i = 0; i < (int2023_t::kBytes - first_one_index) * int2023_t::kBits; ++i) {
-        int offset = i;
-        int start = offset / int2023_t::kBits;
-        offset %= int2023_t::kBits;
         if (GetBitAfterShift(rhs_copy.array[int2023_t::kBytes - 1 - i / int2023_t::kBits], i % int2023_t::kBits) == 1) {
-            int cache = 0;
-            for (int k = int2023_t::kBytes - 1; k >= 0; --k) {
-                for (int m = 0; m < int2023_t::kBits - offset; ++m) {
-                    cache += static_cast<int>(pow(2, m + offset)) * (GetBitAfterShift(lhs_copy.array[k], m));
-                }
-                temp[i].array[k - start] = temp[i].array[k - start] | cache;
-                cache = 0;
-                for (int m = int2023_t::kBits - offset; m < int2023_t::kBits; ++m) {
-                    cache += static_cast<int>(pow(2, m + offset - int2023_t::kBits)) * (GetBitAfterShift(lhs_copy.array[k], m));
-                }
-            }
+            result = result + lhs_copy;
         }
-    }
-    for (int i = 0; i < (int2023_t::kBytes - first_one_index) * int2023_t::kBits; ++i) {
-        result = result + temp[i];
+        lhs_copy = lhs_copy + lhs_copy;
     }
     if ((!IsPositive(lhs.array[0]) || !IsPositive(rhs.array[0])) && !(!IsPositive(lhs.array[0]) && !IsPositive(rhs.array[0]))) {
         result = MakeTwosComplement(result);
     }
-    delete[] temp;
     return result;
 }
 
