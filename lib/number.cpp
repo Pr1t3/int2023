@@ -38,11 +38,11 @@ void ConvertingFromString(char* array_of_symbols, size_t size, int2023_t& result
     result.array[index] = result.array[index] | cache;
 }
 
-uint8_t GetBitAfterShift(int8_t byte, int shift) {
+uint8_t GetBitAfterShift(uint8_t byte, int shift) {
     return ((byte >> shift) & 1);
 }
 
-bool IsPositive(int8_t first_byte) {
+bool IsPositive(uint8_t first_byte) {
     return GetBitAfterShift(first_byte, int2023_t::kBits - 1) == 0;
 }
 
@@ -117,8 +117,8 @@ int2023_t from_string(const char* buff) {
 int2023_t operator+(const int2023_t& lhs, const int2023_t& rhs) {
     int2023_t result;
     int addition = 0;
-    for(int i = int2023_t::kBytes - 1; i >= 0; --i){
-        if((lhs.array[i] + rhs.array[i] + addition) > 255){
+    for (int i = int2023_t::kBytes - 1; i >= 0; --i) {
+        if ((lhs.array[i] + rhs.array[i] + addition) > 255) {
             result.array[i] = lhs.array[i] + rhs.array[i] + addition - 256;
             addition = 1;
         } else {
@@ -213,13 +213,13 @@ bool operator!=(const int2023_t& lhs, const int2023_t& rhs) {
 }
 
 bool operator<(const int2023_t& lhs, const int2023_t& rhs) {
-    if(lhs == rhs){
+    if (lhs == rhs) {
         return false;
     }
     if (!IsPositive(lhs.array[0])) {
         if (!IsPositive(rhs.array[0])) {
-            for(int i = 0; i < int2023_t::kBytes; ++i){
-                if(lhs.array[i] != rhs.array[i]){
+            for (int i = 0; i < int2023_t::kBytes; ++i) {
+                if (lhs.array[i] != rhs.array[i]) {
                     return lhs.array[i] < rhs.array[i];
                 }
             }
@@ -227,12 +227,12 @@ bool operator<(const int2023_t& lhs, const int2023_t& rhs) {
             return true;
         }
     } else {
-        if (!IsPositive(rhs.array[0])){
+        if (!IsPositive(rhs.array[0])) {
             return false;
         }
         else {
-            for(int i = 0; i < int2023_t::kBytes; ++i){
-                if(lhs.array[i] != rhs.array[i]){
+            for (int i = 0; i < int2023_t::kBytes; ++i) {
+                if (lhs.array[i] != rhs.array[i]) {
                     return lhs.array[i] < rhs.array[i];
                 }
             }
