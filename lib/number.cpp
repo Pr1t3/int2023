@@ -1,6 +1,6 @@
 #include "number.h"
 
-bool IsConvertedToBin(const char* array_of_symbols, int size) {
+bool IsStringEmpty(const char* array_of_symbols, int size) {
     for (int i = 0; i < size; ++i) {
         if (array_of_symbols[i] != '0') {
             return false;
@@ -9,11 +9,11 @@ bool IsConvertedToBin(const char* array_of_symbols, int size) {
     return true;
 }
 
-void Bin(char* array_of_symbols, size_t size, int2023_t& result) {
+void ConvertingFromString(char* array_of_symbols, size_t size, int2023_t& result) {
     int index = int2023_t::kBytes - 1;
     int8_t count = 0;
     int8_t cache = 0;
-    while (!IsConvertedToBin(array_of_symbols, size)) {
+    while (!IsStringEmpty(array_of_symbols, size)) {
         int addition = 0;
         for (int i = 0; i < size; ++i) {
             if (i == size - 1) {
@@ -38,15 +38,12 @@ void Bin(char* array_of_symbols, size_t size, int2023_t& result) {
     result.array[index] = result.array[index] | cache;
 }
 
-int GetBitAfterShift(int8_t byte, int shift) {
-    return (static_cast<int>(byte >> shift) & 1);
+uint8_t GetBitAfterShift(int8_t byte, int shift) {
+    return ((byte >> shift) & 1);
 }
 
 bool IsPositive(int8_t first_byte) {
-    if (GetBitAfterShift(first_byte, int2023_t::kBits - 1) == 0) {
-        return true;
-    }
-    return false;
+    return GetBitAfterShift(first_byte, int2023_t::kBits - 1) == 0;
 }
 
 int2023_t MakeTwosComplement(const int2023_t& num) {
@@ -109,7 +106,7 @@ int2023_t from_string(const char* buff) {
         array_of_symbols[is_negative ? index - 1 : index] = buff[index];
         ++index;
     }
-    Bin(array_of_symbols, is_negative ? size - 1 : size, result);
+    ConvertingFromString(array_of_symbols, is_negative ? size - 1 : size, result);
     if (is_negative) {
         result = MakeTwosComplement(result);
     }
@@ -139,8 +136,11 @@ int2023_t operator-(const int2023_t& lhs, const int2023_t& rhs) {
 
 
 int2023_t operator*(const int2023_t& lhs, const int2023_t& rhs) {
-    int2023_t rhs_copy = abs(rhs);
     int2023_t lhs_copy = abs(lhs);
+    int2023_t rhs_copy = abs(rhs);
+    if (rhs_copy == from_int(0)) {
+        return from_int(0);
+    }
     int first_one_index = int2023_t::kBytes - 1;
     for (int i = 0; i < int2023_t::kBytes; ++i) {
         if (rhs_copy.array[i] != 0) {
@@ -162,13 +162,13 @@ int2023_t operator*(const int2023_t& lhs, const int2023_t& rhs) {
 }
 
 int2023_t operator/(const int2023_t& lhs, const int2023_t& rhs) {
+    if (rhs == from_int(0) || rhs == from_int(1)) {
+        return lhs;
+    }
     int2023_t lhs_copy = abs(lhs);
     int2023_t rhs_copy = abs(rhs);
     if (lhs_copy < rhs_copy) {
         return from_int(0);
-    }
-    if (rhs == from_int(0) || rhs == from_int(1)) {
-        return lhs;
     }
     int first_one_index = int2023_t::kBytes - 1;
     for (int i = 0; i < int2023_t::kBytes; ++i) {
@@ -182,7 +182,10 @@ int2023_t operator/(const int2023_t& lhs, const int2023_t& rhs) {
     for (int i = first_one_index; i < int2023_t::kBytes; ++i) {
         int8_t cache = 0;
         for (int j = int2023_t::kBits - 1; j >= 0; --j) {
-            remainder = remainder + remainder + from_int(GetBitAfterShift(lhs_copy.array[i], j));
+            remainder = remainder + remainder;
+            if (GetBitAfterShift(lhs_copy.array[i], j) == 1){
+                remainder = remainder + from_int(1);
+            }
             if (rhs_copy < remainder || rhs_copy == remainder) {
                 cache += static_cast<int>(pow(2, j));
                 remainder = remainder - rhs_copy;
@@ -210,14 +213,15 @@ bool operator!=(const int2023_t& lhs, const int2023_t& rhs) {
 }
 
 bool operator<(const int2023_t& lhs, const int2023_t& rhs) {
-    int2023_t lhs_abs = abs(lhs);
-    int2023_t rhs_abs = abs(rhs);
+    if(lhs == rhs){
+        return false;
+    }
     if (!IsPositive(lhs.array[0])) {
         if (!IsPositive(rhs.array[0])) {
-            if (!IsPositive((lhs_abs - rhs_abs).array[0])) {
-                return true;
-            } else {
-                return false;
+            for(int i = 0; i < int2023_t::kBytes; ++i){
+                if(lhs.array[i] != rhs.array[i]){
+                    return lhs.array[i] < rhs.array[i];
+                }
             }
         } else {
             return true;
@@ -227,20 +231,18 @@ bool operator<(const int2023_t& lhs, const int2023_t& rhs) {
             return false;
         }
         else {
-            if (IsPositive((rhs - lhs).array[0]) && (rhs - lhs) != from_int(0)) {
-                return true;
-            } else {
-                return false;
+            for(int i = 0; i < int2023_t::kBytes; ++i){
+                if(lhs.array[i] != rhs.array[i]){
+                    return lhs.array[i] < rhs.array[i];
+                }
             }
         }
     }
 }
 
 std::ostream& operator<<(std::ostream& stream, const int2023_t& value) {
-    for (int i = 0; i < int2023_t::kBytes; ++i) {
-        for (int j = int2023_t::kBits - 1; j >= 0; --j) {
-            stream << GetBitAfterShift(value.array[i], j);
-        }
+    for (uint8_t i : value.array) {
+        stream << static_cast<int>(i);
     }
     return stream;
 }
